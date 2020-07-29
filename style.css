@@ -1,4 +1,13 @@
 body {
-    background-image: url(./Science_forecasting-1152325323.jpg);
+    background-image: url(./1-whytheweathe.jpg);
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    font-style: normal;
+}
+
+.navbar {
+    font-weight: bolder;
+    font-size: xx-large;
+    
 }
 
