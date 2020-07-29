@@ -3,11 +3,15 @@ body {
     font-family: 'Times New Roman', Times, serif;
     font-weight: bolder;
     font-style: normal;
+    font-size: xx-large;
 }
 
-.navbar {
+.navbar-brand {
+    background-image: unset;
     font-weight: bolder;
     font-size: xx-large;
-    
+   
 }
+
+
 
