@@ -1,10 +1,10 @@
 $(document).ready(function() {
 
 // Search area variables 
-const searchButt = $(".search-butt");
+const searchButton = $(".search-button");
 
 // Current weather HTML elements
-const cityLabel = $(".city-label");
+const cityLabel = $(".city-input");
 const currentTemp = $("#current-temp");
 const currentHumid = $("#current-humid");
 const currentWind = $("#current-wind");
