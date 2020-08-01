@@ -94,8 +94,8 @@ function createHistoryButton(cityName) {
     if (!citiesArray.includes(cityName)){
         citiesArray.push(cityName);
         localStorage.setItem("localWeatherSearches", JSON.stringify(citiesArray));
-    }
-
+    } 
+    
     $("#previousSearch").prepend(`
     <button class="btn btn-light cityHistoryBtn" value='${cityName}'>${cityName}</button>
     `);
@@ -106,6 +106,10 @@ function writeSearchHistory(array) {
         createHistoryButton(array[i]);
     })
 }
+
+$("#clear-history").on("click" , function() {
+    $("#previousSearch").removeData();
+})
 
 // Get a deafult weather search
 returnCurrentWeather("Kampala");
