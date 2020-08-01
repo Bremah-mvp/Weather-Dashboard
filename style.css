@@ -6,12 +6,8 @@ body {
     font-size: xx-large;
 }
 
-.navbar-brand {
-    background-image: unset;
-    font-weight: bolder;
-    font-size: xx-large;
-   
-}
+
+
 
 .searchColumn {
     background-color: #eee;

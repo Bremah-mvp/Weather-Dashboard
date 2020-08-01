@@ -1,185 +1,125 @@
-$(document).ready(function() {
+const apiKey = "0765d126b0f6a7eb158764d733ae5823";
+var currWeatherDiv = $("#currentWeather");
+var forecastDiv = $("#weatherForecast");
+var citiesArray;
 
-   $("#search-button").on("click" , function(){
+if (localStorage.getItem("localWeatherSearches")) {
+    citiesArray = JSON.parse(localStorage.getItem("localWeatherSearches"));
+    writeSearchHistory(citiesArray);
+} else {
+    citiesArray = [];
+};
 
-    var inputE1 = $("#city-input").val();
-    var clearEl = $("#clear-history").val();
-    var nameEl = $("#city-name").val();
-    var currentPicEl = $("#current-pic").val();
-    var currentTempEl = $("#temperature").val();
-    var currentHumidityEl = $("#humidity").val();
-    var currentWindEl = $("#wind-speed").val();
-    var currentUVEl = $("#UV-index").val();
-    const historyEl = $("#history").val();
+
+function returnCurrentWeather(cityName) {
+    let queryURL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&APPID=${apiKey}`;
+
+    $.get(queryURL).then(function(response){
+        let currTime = new Date(response.dt*1000);
+        let weatherIcon = `https://openweathermap.org/img/wn/${response.weather[0].icon}@2x.png`;
+
+        currWeatherDiv.html(`
+        <h2>${response.name}, ${response.sys.country} (${currTime.getMonth()+1}/${currTime.getDate()}/${currTime.getFullYear()})<img src=${weatherIcon} height="70px"></h2>
+        <p>Temperature: ${response.main.temp} &#176;C</p>
+        <p>Humidity: ${response.main.humidity}%</p>
+        <p>Wind Speed: ${response.wind.speed} m/s</p>
+        `, returnUVIndex(response.coord))
+        createHistoryButton(response.name);
+    })
+};
+
+function returnWeatherForecast(cityName) {
+    let queryURL = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=metric&APPID=${apiKey}`;
+
+    $.get(queryURL).then(function(response){
+        let forecastInfo = response.list;
+        forecastDiv.empty();
+        $.each(forecastInfo, function(i) {
+            if (!forecastInfo[i].dt_txt.includes("12:00:00")) {
+                return;
+            }
+            let forecastDate = new Date(forecastInfo[i].dt*1000);
+            let weatherIcon = `https://openweathermap.org/img/wn/${forecastInfo[i].weather[0].icon}.png`;
+
+            forecastDiv.append(`
+            <div class="col-md">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h4>${forecastDate.getMonth()+1}/${forecastDate.getDate()}/${forecastDate.getFullYear()}</h4>
+                        <img src=${weatherIcon} alt="Icon">
+                        <p>Temp: ${forecastInfo[i].main.temp} &#176;C</p>
+                        <p>Humidity: ${forecastInfo[i].main.humidity}%</p>
+                    </div>
+                </div>
+            </div>
+            `)
+        })
+    })
+};
+
+// The current UV index is collected at the same time as the current weather
+// by making use of the searched city's returned coordinates
+function returnUVIndex(coordinates) {
+    let queryURL = `https://api.openweathermap.org/data/2.5/uvi?lat=${coordinates.lat}&lon=${coordinates.lon}&APPID=${apiKey}`;
+
+    $.get(queryURL).then(function(response){
+        let currUVIndex = response.value;
+        let uvSeverity = "green";
+        let textColour = "white"
+        //Change UV background based on severity
+        //Also change text colour for readability
+        if (currUVIndex >= 11) {
+            uvSeverity = "purple";
+        } else if (currUVIndex >= 8) {
+            uvSeverity = "red";
+        } else if (currUVIndex >= 6) {
+            uvSeverity = "orange";
+            textColour = "black"
+        } else if (currUVIndex >= 3) {
+            uvSeverity = "yellow";
+            textColour = "black"
+        }
+        currWeatherDiv.append(`<p>UV Index: <span class="text-${textColour} uvPadding" style="background-color: ${uvSeverity};">${currUVIndex}</span></p>`);
+    })
+}
+
+function createHistoryButton(cityName) {
+    // Check if the button exists in history, and if it does, exit the function
+    var citySearch = cityName.trim();
+    var buttonCheck = $(`#previousSearch > BUTTON[value='${citySearch}']`);
+    if (buttonCheck.length == 1) {
+      return;
+    }
     
-    let searchHistory = JSON.parse(localStorage.getItem("search")) || [];
-    console.log(searchHistory);
-   })
-    
-  // Forecast elements
-  const dayBox = $(".day-box");
-
-  // Recent & Favorite elements
-  const recentCitiesUL = $(".recent-cities");
-
-  // Variables for currently searched city
-  let currentCity;
-  let currentURL;
-
-  // Bring in the local memory
-  let recentCities = JSON.parse(localStorage.getItem("recent-cities"));
-
-  // Set it up if it's empty
-  if (!recentCities) {
-    recentCities = [];
-    localStorage.setItem("recent-cities", JSON.stringify(recentCities));
-
-    // Populate with Boston if empty
-    currentCity = "Boston, MA, United States of America"
-    currentURL = "https://api.openweathermap.org/data/2.5/onecall?lat=42.3602534&lon=-71.0582912&units=imperial&exclude=minutely,hourly&appid=aa0655e595f8fa747f0a44ae37aa4883";
-    weatherCall(currentURL);
-
-    // If it's not empty, let's load the last search
-  } else {
-    currentCity = recentCities[0].city;
-    currentURL = recentCities[0].URL;
-    weatherCall(currentURL);
-  }
-  // Put the recent searches from memory in the dropdown.
-  writeRecent();
-
-  // Listen for the Search click
-  searchButt.on("click", getCoords);
-
-  // Use the search term to determine the correct coordinates
-  function getCoords() {
-    let placeName = $("input").val();
-    let geoAPIURL = "https://api.opencagedata.com/geocode/v1/json?q=" + placeName + "&key=eb47c1b37c7f4b77b7dc729f0915b698";
-    $.get(geoAPIURL, function (result) {
-      currentCity = result.results[0].formatted;
-      const lat = result.results[0].geometry.lat;
-      const lng = result.results[0].geometry.lng;
-
-      // Send the cords to be formatted for the weather API call
-      buildWeatherURL(lat, lng);
-    });
-  }
-
-  // Getting the URL built for the weather API call
-  function buildWeatherURL(lat, lng) {
-    let weatherURL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&units=imperial&exclude=minutely,hourly&appid=aa0655e595f8fa747f0a44ae37aa4883`;
-    currentURL = weatherURL.toString();
-
-    // Send the formatted URL to the API call function
-    weatherCall(weatherURL)
-  }
-
-  // API call for the weather
-  function weatherCall(weatherURL) {
-    let now = moment();
-    $.get(weatherURL, function (result) {
-
-      // Display the current weather results
-      $(".current-weather-icon").attr("src", `http://openweathermap.org/img/wn/${result.current.weather[0].icon}@2x.png`);
-      cityLabel.text(`Current weather in ${currentCity}`)
-
-      currentTemp.text(` ${Math.round(result.current.temp)}ºF`);
-      currentWind.text(` ${Math.round(result.current.wind_speed)} mph`);
-      currentHumid.text(` ${Math.round(result.current.humidity)}%`);
-      currentUV.text(` ${result.current.uvi}`)
-
-      // Display forecasted weather
-
-      dayBox.each(function (day) {
-
-        day++
-
-        const _this = $(this);
-        _this.find(".forecast-day").text(now.add(1, "d").format("ddd, MMM D, YYYY"));
-        _this.find(".weather-icon").attr("src", `http://openweathermap.org/img/wn/${result.daily[day].weather[0].icon}@2x.png`);
-        _this.find(".forecast-temp").text(` ${Math.round(result.daily[day].temp.day)}ºF`);
-        _this.find(".forecast-precip").text(` ${Math.round(result.daily[day].pop * 100)}%`);
-        _this.find(".forecast-humid").text(` ${Math.round(result.daily[day].humidity)}%`);
-      });
-      // http://openweathermap.org/img/wn/10d@2x.png
-
-
-
-      // Send the current search to local storage for recent history
-      storeRecent();
-    });
-  };
-
-  // Filling the recent area in the dropdown
-  function writeRecent() {
-    recentCities = recentCities.slice(0, 5);
-    recentCitiesUL.empty();
-    recentCities.forEach(function (item) {
-
-      const newLI = $("<li>").attr("data-url", item.URL).attr("data-full", item.full).text(item.city)
-      recentCitiesUL.append(newLI);
-    });
-  }
-
-  // Building recent search history
-  function storeRecent() {
-    recentCities = JSON.parse(localStorage.getItem("recent-cities"));
-    const currentLabel = currentCity.split(",");
-    const currentCityDisplay = `${currentLabel[0]},${currentLabel[1]}`
-
-    // Recent search object with city and Weather API call URL
-    const currentRecent = {
-      city: currentCityDisplay,
-      full: currentCity,
-      URL: currentURL
+    if (!citiesArray.includes(cityName)){
+        citiesArray.push(cityName);
+        localStorage.setItem("localWeatherSearches", JSON.stringify(citiesArray));
     }
 
-    // Check to see if recent search already exists in local storage
-    let exists = false;
-    for (let i = 0; i < recentCities.length; i++) {
+    $("#previousSearch").prepend(`
+    <button class="btn btn-light cityHistoryBtn" value='${cityName}'>${cityName}</button>
+    `);
+}
 
-      // If it does we move it to the top of the list and update local memory
-      if (recentCities[i].city === currentCityDisplay) {
-        exists = true;
-        recentCities.splice(i, 1);
-        recentCities.unshift(currentRecent);
-        recentCities = recentCities.slice(0, 5);
-        localStorage.setItem("recent-cities", JSON.stringify(recentCities));
+function writeSearchHistory(array) {
+    $.each(array, function(i) {
+        createHistoryButton(array[i]);
+    })
+}
 
-        break;
-      }
-    }
+// Get a deafult weather search
+returnCurrentWeather("Kampala");
+returnWeatherForecast("kampala");
 
-    // If it doesn't already exist, we add it to the top of the list.
-    if (!exists) {
-      recentCities.unshift(currentRecent);
-      recentCities = recentCities.slice(0, 5);
-      localStorage.setItem("recent-cities", JSON.stringify(recentCities));
-
-    }
-
-    // Update the dropdown menu
-    writeRecent();
-  }
-
-
-  // Activating the recent cities
-  recentCitiesUL.on("click", function () {
-    const thisClick = event.target;
-
-    if (thisClick.matches("li")) {
-
-      currentCity = thisClick.getAttribute("data-full");
-      currentURL = thisClick.getAttribute("data-url");
-
-      weatherCall(currentURL);
-    }
-
-  });
-  document.querySelector
-
-
-
-  // Nothing below here.
-
+$("#submitCity").click(function() {
+    event.preventDefault();
+    let cityName = $("#cityInput").val();
+    returnCurrentWeather(cityName);
+    returnWeatherForecast(cityName);
 });
+
+$("#previousSearch").click(function() {
+    let cityName = event.target.value;
+    returnCurrentWeather(cityName);
+    returnWeatherForecast(cityName);
+})
