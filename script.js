@@ -108,7 +108,9 @@ function writeSearchHistory(array) {
 }
 
 $("#clear-history").on("click" , function() {
-    $("#previousSearch").removeData();
+    $("#previousSearch").remove();
+    localStorage.clear();
+
 })
 
 // Get a deafult weather search
