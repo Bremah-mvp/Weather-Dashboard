@@ -7,8 +7,11 @@ body {
 }
 
 .navbar-brand {
-    background-color: blue;
-    
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    font-size: xx-large;
+    color: white;
+
 }
 
 
@@ -22,6 +25,7 @@ h2, h3 {
     font-size: xx-large;
     padding-top: 10px;
     font-weight: 600;
+    
     
 }
 

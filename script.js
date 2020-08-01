@@ -42,7 +42,7 @@ function returnWeatherForecast(cityName) {
             let weatherIcon = `https://openweathermap.org/img/wn/${forecastInfo[i].weather[0].icon}.png`;
 
             forecastDiv.append(`
-            <div class="col-md">
+            <div class="col-md-3">
                 <div class="card text-white bg-primary">
                     <div class="card-body">
                         <h4>${forecastDate.getMonth()+1}/${forecastDate.getDate()}/${forecastDate.getFullYear()}</h4>
