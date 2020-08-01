@@ -73,10 +73,10 @@ function returnUVIndex(coordinates) {
         } else if (currUVIndex >= 8) {
             uvSeverity = "red";
         } else if (currUVIndex >= 6) {
-            uvSeverity = "yellow";
+            uvSeverity = "orange";
             textColour = "black"
         } else if (currUVIndex >= 3) {
-            uvSeverity = "brown";
+            uvSeverity = "yellow";
             textColour = "black"
         }
         currWeatherDiv.append(`<p>UV Index: <span class="text-${textColour} uvPadding" style="background-color: ${uvSeverity};">${currUVIndex}</span></p>`);

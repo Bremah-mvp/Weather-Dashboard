@@ -6,7 +6,10 @@ body {
     font-size: xx-large;
 }
 
-
+.navbar-brand {
+    background-color: blue;
+    
+}
 
 
 .searchColumn {
@@ -14,8 +17,12 @@ body {
 }
 
 h2, h3 {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    font-size: xx-large;
     padding-top: 10px;
     font-weight: 600;
+    
 }
 
 h4 {
