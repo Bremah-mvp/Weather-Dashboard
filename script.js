@@ -69,14 +69,14 @@ function returnUVIndex(coordinates) {
         //Change UV background based on severity
         //Also change text colour for readability
         if (currUVIndex >= 11) {
-            uvSeverity = "purple";
+            uvSeverity = "blue";
         } else if (currUVIndex >= 8) {
             uvSeverity = "red";
         } else if (currUVIndex >= 6) {
-            uvSeverity = "orange";
+            uvSeverity = "yellow";
             textColour = "black"
         } else if (currUVIndex >= 3) {
-            uvSeverity = "yellow";
+            uvSeverity = "brown";
             textColour = "black"
         }
         currWeatherDiv.append(`<p>UV Index: <span class="text-${textColour} uvPadding" style="background-color: ${uvSeverity};">${currUVIndex}</span></p>`);
