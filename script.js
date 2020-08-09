@@ -74,7 +74,7 @@ function returnUVIndex(coordinates) {
             uvSeverity = "red";
         } else if (currUVIndex >= 6) {
             uvSeverity = "orange";
-            textColour = "black"
+            textColour = "yellow"
         } else if (currUVIndex >= 3) {
             uvSeverity = "yellow";
             textColour = "white"
