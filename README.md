@@ -46,4 +46,4 @@ only that it will still return the updated current weather and the next five day
 THIS IS THE LINK TO THE APP :https://bremah-mvp.github.io/Weather-Dashboard/
 
 Below is a screenshot of the APPLICATION.
-![picture] https://github.com/Bremah-mvp/Weather-Dashboard/blob/master/dashb.png
+![picture] (https://github.com/Bremah-mvp/Weather-Dashboard/blob/master/dashb.png)
